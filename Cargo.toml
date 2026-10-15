@@ -1,0 +1,9 @@
+[package]
+name = "archive_keeper"
+version = "0.1.0"
+edition = "2024"
+description = "A terminal-based document archive manager"
+license = "MIT"
+readme = "README.md"
+
+[dependencies]
