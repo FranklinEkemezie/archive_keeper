@@ -10,7 +10,7 @@ type OptionInfo = (
 
 type DateYear = u16;
 
-type DocumentId = u32;
+type DocumentId = String;
 type DocumentCategory = u8;
 type Document = (
     DocumentId,         // id       - The document (auto-generated) ID
@@ -37,28 +37,26 @@ const DOCUMENT_CATEGORIES: [DocumentCategory; 4] = [
 ];
 
 const MAX_NUM_OF_DOCUMENT: usize = 10;
-const INITIAL_DOCUMENT_ID: DocumentId = 0;
 const MIN_VALID_DOCUMENT_YEAR: DateYear = 1900;
 const CURRENT_YEAR: DateYear = 2026;
 
 type DocumentRepository = [Document; MAX_NUM_OF_DOCUMENT]; 
 
 const INITIAL_DOCUMENTS: DocumentRepository = [
-    (0, String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (1, String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (2, String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (3, String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (4, String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (5, String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (6, String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (7, String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (8, String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (9, String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
 ];
 
 type AppData = (
-    DocumentId,         // last saved document ID
-    DocumentId,         // next available document ID
+    usize,              // next available index
     DocumentRepository  // document repository
 );
 
@@ -87,11 +85,9 @@ fn main() {
 
     ui_print_heading("Welcome to The Archive Keeper");
 
-    let last_document_id: DocumentId = INITIAL_DOCUMENT_ID;
-    let next_available_id: DocumentId = INITIAL_DOCUMENT_ID;
     let document_repository: DocumentRepository = INITIAL_DOCUMENTS;
 
-    let mut app_data: AppData = (last_document_id, next_available_id, document_repository);
+    let mut app_data: AppData = (0, document_repository);
 
     loop {
 
@@ -266,9 +262,9 @@ fn main_menu_register_document(app_data: &mut AppData) -> bool {
         break;
     }
 
-    let id = app_data_generate_document_id(app_data);
+    let id = app_data_generate_document_id(app_data, category);
 
-    let document = document_create(id, &title, &author, category, year);
+    let document = document_create(&id, &title, &author, category, year);
 
     if ! app_data_insert_document(app_data, document) {
         ui_print_error_msg("An error occurred while registering your document. Please try again!");
@@ -300,7 +296,7 @@ fn main_menu_view_registered_documents(app_data: &AppData) -> bool {
     println!("{horizontal_border}");
 
     let mut i = 0;
-    for d in &app_data.2[..] {
+    for d in &app_data.1[..] {
 
         if document_is_placeholder(d) { continue; }
 
@@ -338,7 +334,7 @@ fn main_menu_search_document(app_data: &AppData) -> bool {
     println!("{horizontal_border}");
 
     let mut i = 0;
-    for d in &app_data.2[..] {
+    for d in &app_data.1[..] {
 
         if document_is_placeholder(d) { continue; }
 
@@ -375,13 +371,13 @@ fn main_menu_borrow_document(app_data: &mut AppData) -> bool {
 
     ui_print_subheading("Borrow a Document");
 
-    let document_id = ui_prompt_user_int("Enter document ID") as DocumentId;
+    let document_id = ui_prompt_user("Enter document ID") as DocumentId;
 
-    for d in &mut app_data.2[..] {
+    for d in &mut app_data.1[..] {
 
         if 
             document_is_placeholder(d) || 
-            document_get_id(d) != document_id 
+            *document_get_id(d) != document_id 
         { continue; }
 
 
@@ -410,13 +406,13 @@ fn main_menu_return_borrowed_document(app_data: &mut AppData) -> bool {
 
     ui_print_subheading("Return a Borrowed Document");
 
-    let document_id = ui_prompt_user_int("Enter document ID") as DocumentId;
+    let document_id = ui_prompt_user("Enter document ID") as DocumentId;
 
-    for d in &mut app_data.2[..] {
+    for d in &mut app_data.1[..] {
 
         if 
             document_is_placeholder(d) ||
-            document_get_id(d) != document_id
+            *document_get_id(d) != document_id
         { continue; }
 
         if document_is_available(d) {
@@ -484,22 +480,24 @@ fn main_menu_exit_app() -> bool {
  * ------------------------------------
  */
 
-fn app_data_generate_document_id(app_data: &mut AppData) -> DocumentId {
-    app_data.0 += 1;
+
+fn app_data_get_next_available_index(app_data: &AppData) -> usize {
     app_data.0
 }
 
-fn app_data_get_next_available_document_id(app_data: &mut AppData) -> DocumentId {
-    // TODO: Handle borrowing, deletion and when document repository is full.
-    app_data.1 += 1;
-    app_data.1
+fn app_data_generate_document_id(app_data: &mut AppData, category: DocumentCategory) -> DocumentId {
+
+    let id = std::format!("DOC-{:03}-{:03}", category, 
+        app_data_get_next_available_index(app_data));
+    
+    id
 }
 
 fn app_data_insert_document(app_data: &mut AppData, document: Document) -> bool {
 
-    let next_id = app_data_get_next_available_document_id(app_data) as usize;
+    app_data.1[app_data_get_next_available_index(app_data)] = document;
 
-    app_data.2[next_id] = document;
+    app_data.0 += 1;
 
     true
 }
@@ -507,7 +505,7 @@ fn app_data_insert_document(app_data: &mut AppData, document: Document) -> bool 
 fn app_get_registered_document_count(app_data: &AppData) -> usize {
 
     let mut count = 0;
-    for d in &app_data.2[..] {
+    for d in &app_data.1[..] {
         if ! document_is_placeholder(d) { count += 1 }
     }
 
@@ -518,7 +516,7 @@ fn app_get_archive_statistics(app_data: &AppData) -> ArchiveStatistics {
 
     let mut stats: ArchiveStatistics = (0, 0, 0, (0, 0, 0, 0), (0.0, 0.0, 0.0, 0.0));
 
-    for d in &app_data.2[..] {
+    for d in &app_data.1[..] {
 
         if document_is_placeholder(d) { continue; }
 
@@ -553,7 +551,7 @@ fn app_get_archive_statistics(app_data: &AppData) -> ArchiveStatistics {
  */
 
 fn document_create(
-    id: DocumentId,
+    id: &DocumentId,
     title: &str,
     author: &str,
     category: DocumentCategory,
@@ -574,7 +572,7 @@ fn document_create(
         panic!("year is invalid");
     }
 
-    (id, String::from(title), String::from(author), category, year, false, false)
+    (id.to_string(), String::from(title), String::from(author), category, year, false, false)
 }
 
 fn document_is_category_valid(category: DocumentCategory) -> bool {
@@ -614,8 +612,8 @@ fn document_category_prompt_category() -> DocumentCategory {
 
 }
 
-fn document_get_id(document: &Document) -> DocumentId {
-    document.0
+fn document_get_id(document: &Document) -> &DocumentId {
+    &document.0
 }
 
 fn document_get_title(document: &Document) -> &String {
