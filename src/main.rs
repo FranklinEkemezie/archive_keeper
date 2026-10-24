@@ -36,7 +36,7 @@ const DOCUMENT_CATEGORIES: [DocumentCategory; 4] = [
     DOCUMENT_CATEGORY_INTERNAL_MEMO
 ];
 
-const MAX_NUM_OF_DOCUMENT: usize = 10;
+const MAX_NUM_OF_DOCUMENT: usize = 2;
 const MIN_VALID_DOCUMENT_YEAR: DateYear = 1900;
 const CURRENT_YEAR: DateYear = 2026;
 
@@ -45,14 +45,14 @@ type DocumentRepository = [Document; MAX_NUM_OF_DOCUMENT];
 const INITIAL_DOCUMENTS: DocumentRepository = [
     (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
     (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
-    (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    // (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    // (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    // (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    // (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    // (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    // (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    // (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
+    // (String::new(), String::new(), String::new(), DOCUMENT_CATEGORY_RESEARCH_PAPER, 1900, false, true),
 ];
 
 type AppData = (
@@ -242,6 +242,12 @@ fn main_menu_handle_option(option: Option, app_data: &mut AppData) -> bool {
 }
 
 fn main_menu_register_document(app_data: &mut AppData) -> bool {
+
+    
+    if app_data_is_archive_full(app_data) {
+        ui_print_error_msg("Archive is full!");
+        return true;
+    }
 
     ui_print_subheading("Register a new document");
 
@@ -485,7 +491,15 @@ fn app_data_get_next_available_index(app_data: &AppData) -> usize {
     app_data.0
 }
 
+fn app_data_is_archive_full(app_data: &AppData) -> bool {
+    app_data_get_next_available_index(app_data) >= MAX_NUM_OF_DOCUMENT
+}
+
 fn app_data_generate_document_id(app_data: &mut AppData, category: DocumentCategory) -> DocumentId {
+
+    if app_data_is_archive_full(app_data) {
+        panic!("Cannot generate document ID: Repository is full!");
+    }
 
     let id = std::format!("DOC-{:03}-{:03}", category, 
         app_data_get_next_available_index(app_data));
