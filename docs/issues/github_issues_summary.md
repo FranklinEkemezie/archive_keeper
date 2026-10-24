@@ -1,18 +1,30 @@
-# GitHub Issues Created
+# GitHub Issues Summary
 
-All issues created in repository: https://github.com/FranklinEkemezie/archive_keeper
+Repository: https://github.com/FranklinEkemezie/archive_keeper
 
-## Group 1: Critical Data Integrity / Logic Bugs
-- #1 No bounds checking when inserting documents (array out of bounds) - bug, high
-- #2 Panic on invalid registration input (empty title/author) - bug, high  
-- #9 ID generation uses separate counters and slot indexing is incorrect - bug, high
+## Open
 
-## Group 2: Validation & UX Bugs
-- #3 UI does not validate empty title/author before ID allocation/creation - bug, medium
-- #7 Negative ID input becomes large u32 due to cast - bug, low
+| # | Title | Type | Severity |
+|---|---|---|---|
+| 10 | EOF on stdin causes an infinite empty-input retry loop | bug | High |
+| 11 | Archive capacity was reduced to two documents | bug | High |
+| 12 | Category menu accepts 0 and then panics | bug | High |
+| 4 | Replace panics with Result-based validation for robustness | enhancement | Medium |
+| 5 | Consider using Vec<Document> instead of fixed array | enhancement | Medium |
+| 8 | Long titles/authors truncated in table display | enhancement | Low |
 
-## Group 3: Design/Robustness Improvements (Enhancements)
-- #4 Replace panics with Result-based validation for robustness - enhancement, medium
-- #5 Consider using Vec<Document> instead of fixed array - enhancement, low
-- #6 Clarify and simplify ID/slot management - enhancement, medium
-- #8 Long titles/authors truncated in table display - enhancement, low
+## Closed / resolved in this pass
+
+| # | Title | Resolution commit |
+|---|---|---|
+| 1 | No bounds checking when inserting documents (array out of bounds) | 77cb897 |
+| 2 | Panic on invalid registration input (empty title/author) | db09976 |
+| 3 | UI does not validate empty title/author before ID allocation/creation | db09976 |
+| 6 | Clarify and simplify ID/slot management | 5a16ceb |
+| 7 | Negative ID input becomes large u32 due to cast | 5a16ceb |
+| 9 | ID generation uses separate counters and slot indexing is incorrect | 5a16ceb |
+
+## Test status
+
+`cargo test` currently reports 15 passed and 3 failed. The failures are deliberate
+regression tests for issues #10, #11, and #12.
