@@ -133,10 +133,10 @@ fn ui_print_error_msg(msg: &str) {
 
 fn ui_prompt_user(label: &str) -> String {
 
-    print!("{label}: ");
-    io::stdout().flush().expect("Failed to flush stdout");
-
     loop {
+        print!("{label}: ");
+        io::stdout().flush().expect("Failed to flush stdout");
+
         let mut buf = String::from("");
 
         let result = io::stdin().read_line(&mut buf);
@@ -144,6 +144,13 @@ fn ui_prompt_user(label: &str) -> String {
             ui_print_error_msg("Failed to get user input. Please try again");
             continue;
         }
+
+        let buf = buf.trim();
+        if buf.is_empty() {
+            ui_print_error_msg("User entered an empty value");
+            continue;
+        }
+
 
         return String::from(buf.trim());
     }
