@@ -299,7 +299,7 @@ fn main_menu_view_registered_documents(app_data: &AppData) -> bool {
         return true;
     }
 
-    let table_heading = std::format!("| {:^8} | {:^8} | {:^32} | {:^24} | {:^24} | {:^8} | {:^16} |",
+    let table_heading = std::format!("| {:^8} | {:^16} | {:^32} | {:^24} | {:^24} | {:^8} | {:^16} |",
         "S/N", "ID", "Title", "Author", "Category", "Year", "Availability");
     let horizontal_border = "-".repeat(table_heading.len());
 
@@ -315,7 +315,7 @@ fn main_menu_view_registered_documents(app_data: &AppData) -> bool {
 
         i += 1;
 
-        println!("| {:^8} | {:^8} | {:32} | {:24} | {:24} | {:^8} | {:16} |",
+        println!("| {:^8} | {:^16} | {:32} | {:24} | {:24} | {:^8} | {:16} |",
             i,
             document_get_id(d),
             document_get_title(d),
@@ -336,7 +336,7 @@ fn main_menu_search_document(app_data: &AppData) -> bool {
 
     let search_query = ui_prompt_user("Enter keyword").to_lowercase();
 
-    let table_heading = std::format!("| {:^8} | {:^8} | {:^32} | {:^24} | {:^24} | {:^8} | {:^16} |",
+    let table_heading = std::format!("| {:^8} | {:^16} | {:^32} | {:^24} | {:^24} | {:^8} | {:^16} |",
         "S/N", "ID", "Title", "Author", "Category", "Year", "Availability");
     let horizontal_border = "-".repeat(table_heading.len());
 
@@ -360,7 +360,7 @@ fn main_menu_search_document(app_data: &AppData) -> bool {
 
         i += 1;
 
-        println!("| {:^8} | {:^8} | {:32} | {:24} | {:24} | {:^8} | {:16} |",
+        println!("| {:^8} | {:^16} | {:32} | {:24} | {:24} | {:^8} | {:16} |",
             i,
             document_get_id(d),
             document_get_title(d),
@@ -472,10 +472,10 @@ fn main_menu_view_archive_stats(app_data: &AppData) -> bool {
         println!("{table_heading}");
         println!("{bottom_border}");
 
-        println!(" {:24} | {:8} | {:8} ", "Research Paper",   by_categroy.0, &std::format!("{:.2}", by_category_percent.0));
-        println!(" {:24} | {:8} | {:8} ", "Technical Report", by_categroy.1, &std::format!("{:.2}", by_category_percent.1));
-        println!(" {:24} | {:8} | {:8} ", "Meeting Notes",    by_categroy.2, &std::format!("{:.2}", by_category_percent.2));
-        println!(" {:24} | {:8} | {:8} ", "Internal Memo",    by_categroy.3, &std::format!("{:.2}", by_category_percent.3));
+        println!(" {:24} | {:8} | {:8} ", "Research Paper",   by_categroy.0, &std::format!("{:>6.2}", by_category_percent.0));
+        println!(" {:24} | {:8} | {:8} ", "Technical Report", by_categroy.1, &std::format!("{:>6.2}", by_category_percent.1));
+        println!(" {:24} | {:8} | {:8} ", "Meeting Notes",    by_categroy.2, &std::format!("{:>6.2}", by_category_percent.2));
+        println!(" {:24} | {:8} | {:8} ", "Internal Memo",    by_categroy.3, &std::format!("{:>6.2}", by_category_percent.3));
     }
 
     true
